@@ -11,7 +11,6 @@ kgen(num::Num, gradlist::Vector{Num}, raw_outputs::Vector{Symbol}; constants::Ve
 function kgen(num::Num, gradlist::Vector{Num}, raw_outputs::Vector{Symbol}, constants::Vector{Num}, overwrite::Bool, splitting::Symbol, affine_quadratic::Bool)
     # Create a hash of the expression and check if the function already exists
     expr_hash = string(hash(string(num)*string(gradlist)), base=62)
-    # expr_hash = string(hash(num+sum(gradlist)), base=62)
     if (overwrite==false) && (isfile(joinpath(@__DIR__, "storage", "f_"*expr_hash*".jl")))
         try func_name = eval(Meta.parse("f_"*expr_hash))
             return func_name
@@ -103,9 +102,6 @@ function kgen(num::Num, gradlist::Vector{Num}, raw_outputs::Vector{Symbol}, cons
     elseif splitting==:high # Formerly default
         split_point = 1500
         max_size = 2000
-    # elseif splitting==:high # More splitting
-    #     split_point = 1000
-    #     max_size = 1200
     elseif splitting==:max # Extremely small
         split_point = 500
         max_size = 750
@@ -129,11 +125,6 @@ function kgen(num::Num, gradlist::Vector{Num}, raw_outputs::Vector{Symbol}, cons
         kernel_count = 1
         # structure_list = String[] # Experimental
         while !complete
-            # println("Kernel: $kernel_count")
-            # for j in 1:length(n_lines)
-            #     println("$j : $(factored[j]), $(n_lines[j]), $(n_vars[j])")
-            # end
-            # println("")
             # Determine which line to break at
             line_ID = findfirst(x -> x > split_point, n_lines)
             vars_ID = findfirst(x -> (x == 30) || (x == 31), n_vars)
